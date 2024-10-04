@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  redshift:
+    image: postgres:13
+    container_name: redshift_local
+    environment:
+      POSTGRES_DB: dev
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5439:5432"
+    volumes:
+      - redshift_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  s3:
+    image: minio/minio
+    container_name: local_s3
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9000:9000"
+    command: server /data
+    volumes:
+      - s3_data:/data
+
+  ingestion_lambda:
+    build: ./lambda/ingestion
+    container_name: ingestion_lambda
+    environment:
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
+    volumes:
+      - ./lambda/ingestion:/var/task
+    entrypoint: ["/usr/bin/python3", "/var/task/lambda_function.py"]
+
+  transformation_lambda:
+    build: ./lambda/transformation
+    container_name: transformation_lambda
+    environment:
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
+    volumes:
+      - ./lambda/transformation:/var/task
+    entrypoint: ["/usr/bin/python3", "/var/task/lambda_function.py"]
+
+  retrieval_lambda:
+    build: ./lambda/retrieval
+    container_name: retrieval_lambda
+    environment:
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
+    volumes:
+      - ./lambda/retrieval:/var/task
+    entrypoint: ["/usr/bin/python3", "/var/task/lambda_function.py"]
+
+volumes:
+  redshift_data:
+  s3_data:

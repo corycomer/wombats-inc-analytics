@@ -1,0 +1,5 @@
+unittest
+moto
+requests-mock
+boto3
+pyspark

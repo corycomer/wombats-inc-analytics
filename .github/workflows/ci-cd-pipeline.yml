@@ -1,0 +1,52 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        pip install -r ingestion/requirements.txt
+        pip install -r retrieval/requirements.txt
+        pip install -r requirements-dev.txt  # Install test/dev dependencies
+
+    - name: Run unit tests
+      run: |
+        pytest tests/unit/
+
+    - name: Run integration tests
+      run: |
+        pytest tests/integration/
+
+    - name: CDK Bootstrap (if using CDK)
+      run: |
+        npx cdk bootstrap
+
+    - name: Deploy infrastructure
+      run: |
+        npx cdk deploy --all --require-approval never

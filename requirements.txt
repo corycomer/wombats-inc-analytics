@@ -1,0 +1,14 @@
+boto3
+psycopg2
+requests  # Used for API requests in Lambda
+botocore
+aws-cdk.core
+aws-cdk.aws-lambda
+aws-cdk.aws-s3
+aws-cdk.aws-apigateway
+aws-cdk.aws-redshift
+aws-cdk.aws-iam  # Added for handling IAM permissions
+
+# Optional for testing
+pytest  # If you need to test CDK code
+moto  # Mock AWS services for local testing

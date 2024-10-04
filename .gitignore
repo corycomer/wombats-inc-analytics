@@ -1,0 +1,22 @@
+# Python files
+*.pyc
+__pycache__/
+
+# CDK artifacts
+cdk.out/
+cdk.context.json  # CDK context file generated during synth
+
+# AWS credentials
+*.env
+
+# Dependency directories
+node_modules/
+venv/  # If using a virtual environment
+
+# Test outputs and logs
+.coverage
+*.log
+
+# Docker
+**/.dockerignore
+docker-compose.override.yml  # In case you have docker overrides
